@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateReportDto, UpdateReportDto } from './dto';
@@ -7,6 +7,7 @@ import { Report } from './entities/report.entity';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ReportImage } from './entities/report-image.entity';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
+import { UpdateReportStatusDto } from './dto/update-report-status.dto';
 
 @Injectable()
 export class ReportsService {
@@ -40,6 +41,43 @@ export class ReportsService {
 
     } catch (error) {
       console.log(error);
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error, check server logs');
+    }
+  }
+
+  async uploadImages(id: string, user: User, files: Express.Multer.File[]){
+    try {
+      
+      let images: string[];
+
+      const report = await this.reportRepository.findOne({
+        where: { id: id }
+      });
+
+      if( report.user.id !== user.id ) return new ForbiddenException().getResponse();
+
+      if( !files ) return new BadRequestException('No files uploaded').getResponse();
+
+      if( files.length + report.images.length > 10 ) return new BadRequestException('Cannot add more than 10 images to a report').getResponse();
+      
+
+      images = await this.cloudinaryService.uploadFiles(files, 'reportes');
+
+      const uploadedImages = images.map(image => this.reportImageRepository.create({
+        url: image,
+        report
+      }));
+      
+      await this.reportImageRepository.save(uploadedImages);
+      const urls = uploadedImages.map(image => {
+        const { report, ...urls } = image;
+        return urls;
+      });
+      
+      return urls;
+      
+    } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Unexpected error, check server logs');
     }
@@ -135,6 +173,18 @@ export class ReportsService {
       if( !report ) return await this.reportRepository.delete(id);
       if( report.user.id !== user.id ) return new ForbiddenException().getResponse();
 
+      const images = await this.reportImageRepository.find({
+        where: { report: { id: id } }
+      });
+
+      const urls: string[] = images.map(image => {
+        const imageSplit = image.url.split('/');
+        const imageId = imageSplit[7]+'/'+imageSplit[8].split(".")[0];
+        return imageId;
+      });
+
+      await this.cloudinaryService.deleteFiles(urls);
+
       return await this.reportRepository.delete(id);
       
     } catch (error) {
@@ -142,4 +192,49 @@ export class ReportsService {
       throw new InternalServerErrorException('Unexpected error, check server logs');
     }
   }
+
+  async updateStatus(id: string, updateStatusDto: UpdateReportStatusDto){
+    try {
+
+      const { status } = updateStatusDto;
+
+      const report = await this.reportRepository.findOne({
+        where: { id: id }
+      });
+
+      if( !report ) return new NotFoundException('Reporte no encontrado').getResponse();
+
+      return await this.reportRepository.update( id, { status: status } )
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error, check server logs');
+    }
+  }
+
+  async deleteReportImage(id: string, user: User){
+    try {
+
+      const image = await this.reportImageRepository.findOne({
+        relations: [ 'report' ],
+        where: { id: id }
+      });
+      
+      if( !image ) return await this.reportImageRepository.delete(id);
+
+      if( image.report.user.id !== user.id ) return new ForbiddenException().getResponse()
+
+      const imageSplit = image.url.split('/');
+      const imageId = imageSplit[7]+'/'+imageSplit[8].split(".")[0];
+
+      await this.cloudinaryService.deleteFile(imageId);
+      
+      return await this.reportImageRepository.delete(id);
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error, check server logs');
+    }
+  }
+
 }

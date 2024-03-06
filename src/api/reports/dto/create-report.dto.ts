@@ -1,5 +1,4 @@
-import { IsEnum, IsOptional, IsString, MinLength } from "class-validator";
-import { ReportStatus } from "../enums/report-status.enum";
+import { IsString, MinLength } from "class-validator";
 
 export class CreateReportDto {
 
@@ -10,9 +9,5 @@ export class CreateReportDto {
   @IsString()
   @MinLength(1)
   description: string;
-
-  @IsEnum(ReportStatus)
-  @IsOptional()
-  status?: ReportStatus;
 
 }
