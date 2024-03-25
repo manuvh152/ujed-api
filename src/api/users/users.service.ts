@@ -59,6 +59,7 @@ export class UsersService {
     }
     
     return {
+      id: user.id,
       token: this.getJwt({ id: user.id })
     }
 

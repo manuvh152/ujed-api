@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { ReportStatus } from "../enums/report-status.enum";
 import { User } from "src/api/users/entities/user.entity";
 import { ReportImage } from "./report-image.entity";
+import { Departments } from "../enums/departments.enum";
 
 @Entity('reports')
 export class Report {
@@ -21,6 +22,16 @@ export class Report {
     default: ReportStatus.EnEspera
   })
   status: ReportStatus;
+
+  @Column()
+  location: string;
+
+  @Column({
+    type: 'enum',
+    enum: Departments,
+    nullable: true
+  })
+  department?: string;
 
   @ManyToOne(
     () => User,

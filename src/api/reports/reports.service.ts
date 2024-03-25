@@ -8,6 +8,8 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ReportImage } from './entities/report-image.entity';
 import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { UpdateReportStatusDto } from './dto/update-report-status.dto';
+import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
+import { ReportStatus } from './enums/report-status.enum';
 
 @Injectable()
 export class ReportsService {
@@ -86,14 +88,15 @@ export class ReportsService {
   async findAll(pagination: PaginationDto) {
     try {
       
-      const { limit = 20, offset = 0, order } = pagination;
+      const { limit = 20, offset = 0, order, status } = pagination;
 
       const reports = await this.reportRepository.find({
         take: limit,
         skip: offset,
         order: {
           updated_at: (order) ? order: 'asc'
-        }
+        },
+        where: (status) ? { status: status } : []
       });
 
       return reports;
@@ -202,10 +205,29 @@ export class ReportsService {
         where: { id: id }
       });
 
-      if( !report ) return new NotFoundException('Reporte no encontrado').getResponse();
+      if( !report ) return new NotFoundException('Report not found').getResponse();
 
       return await this.reportRepository.update( id, { status: status } )
 
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error, check server logs');
+    }
+  }
+
+  async updateDepartment(id: string, updateReportDepartment: UpdateReportDepartmentDto){
+    try {
+
+      const { department } = updateReportDepartment;
+
+      const report = await this.reportRepository.findOne({
+        where: { id: id }
+      });
+
+      if( !report ) return new NotFoundException('Report not found').getResponse();
+
+      return await this.reportRepository.update( id, { department: department, status: ReportStatus.Asignado } );
+      
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Unexpected error, check server logs');
