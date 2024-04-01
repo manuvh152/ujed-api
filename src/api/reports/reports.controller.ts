@@ -13,6 +13,7 @@ import { maxFileSize } from 'src/common/constants/constants';
 import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
 import { PdfService } from 'src/common/pdf/pdf.service';
 import * as fs from 'fs';
+import { Departments } from './enums/departments.enum';
 
 @Controller('reports')
 export class ReportsController {
@@ -53,6 +54,22 @@ export class ReportsController {
   @Auth( ValidRoles.admin )
   findAll(@Query() pagination: PaginationDto) {
     return this.reportsService.findAll(pagination);
+  }
+
+  @Get('department/mantenimiento')
+  @Auth( ValidRoles.mantenimiento )
+  findAllByDepartmentMantenimiento(
+    @Query() pagination: PaginationDto
+  ){
+    return this.reportsService.findAllByDepartment(pagination, Departments.Mantenimiento);
+  }
+
+  @Get('department/obras')
+  @Auth( ValidRoles.obras )
+  findAllByDepartmentObras(
+    @Query() pagination: PaginationDto
+  ){
+    return this.reportsService.findAllByDepartment(pagination, Departments.Obras);
   }
 
   @Get(':id/user')

@@ -10,6 +10,7 @@ import { CloudinaryService } from 'src/utils/cloudinary/cloudinary.service';
 import { UpdateReportStatusDto } from './dto/update-report-status.dto';
 import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
 import { ReportStatus } from './enums/report-status.enum';
+import { Departments } from './enums/departments.enum';
 
 @Injectable()
 export class ReportsService {
@@ -97,6 +98,28 @@ export class ReportsService {
           updated_at: (order) ? order: 'asc'
         },
         where: (status) ? { status: status } : []
+      });
+
+      return reports;
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error, check server logs');
+    }
+  }
+
+  async findAllByDepartment(pagination: PaginationDto, department: Departments){
+    try {
+      
+      const { limit = 20, offset = 0, order } = pagination;
+
+      const reports = await this.reportRepository.find({
+        take: limit,
+        skip: offset,
+        order: {
+          updated_at: (order) ? order: 'asc'
+        },
+        where: { department: department }
       });
 
       return reports;
