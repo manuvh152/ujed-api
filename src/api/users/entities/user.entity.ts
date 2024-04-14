@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Report } from "../../reports/entities/report.entity";
+import { Permit } from "src/api/permits/entities/permit.entity";
 
 @Entity('users')
 export class User {
@@ -40,6 +41,12 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(
+    () => Permit,
+    permit => permit.user
+  )
+  permits: Permit;
 
 
 

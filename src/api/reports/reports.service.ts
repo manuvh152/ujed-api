@@ -11,6 +11,7 @@ import { UpdateReportStatusDto } from './dto/update-report-status.dto';
 import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
 import { ReportStatus } from './enums/report-status.enum';
 import { Departments } from './enums/departments.enum';
+import { ReportPaginationDto } from './dto/report-pagination.dto';
 
 @Injectable()
 export class ReportsService {
@@ -86,7 +87,7 @@ export class ReportsService {
     }
   }
 
-  async findAll(pagination: PaginationDto) {
+  async findAll(pagination: ReportPaginationDto) {
     try {
       
       const { limit = 20, offset = 0, order, status } = pagination;
@@ -159,6 +160,8 @@ export class ReportsService {
         where: { id: id }
       });
 
+      if( !report ) return new NotFoundException('Report not found').getResponse();
+
       if( user.roles.includes('admin') ) return report;
 
       if( report.user.id !== user.id ) return new ForbiddenException().getResponse();
@@ -174,7 +177,7 @@ export class ReportsService {
   async update(id: string, updateReportDto: UpdateReportDto, user: User) {
     try {
 
-      const report =  await this.reportRepository.findOne({
+      const report = await this.reportRepository.findOne({
         where: { id: id }
       });
 
@@ -207,6 +210,10 @@ export class ReportsService {
         const imageSplit = image.url.split('/');
         const imageId = imageSplit[7]+'/'+imageSplit[8].split(".")[0];
         return imageId;
+      });
+
+      images.map(async image => {
+        await this.reportImageRepository.delete(image.id)
       });
 
       await this.cloudinaryService.deleteFiles(urls);

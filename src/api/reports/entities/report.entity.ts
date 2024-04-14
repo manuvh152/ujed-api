@@ -3,6 +3,7 @@ import { ReportStatus } from "../enums/report-status.enum";
 import { User } from "src/api/users/entities/user.entity";
 import { ReportImage } from "./report-image.entity";
 import { Departments } from "../enums/departments.enum";
+import { Permit } from "src/api/permits/entities/permit.entity";
 
 @Entity('reports')
 export class Report {
@@ -53,5 +54,11 @@ export class Report {
     { cascade: true, eager: true }
   )
   images?: ReportImage[];
+
+  @OneToMany(
+    () => Permit,
+    permit => permit.report
+  )
+  permits?: Permit
 
 }

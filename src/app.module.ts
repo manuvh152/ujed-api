@@ -9,6 +9,7 @@ import { CommonModule } from './common/common.module';
 import { ReportsModule } from './api/reports/reports.module';
 import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
+import { PermitsModule } from './api/permits/permits.module';
 import databaseConfig from './config/database/database.config';
 
 @Module({
@@ -22,7 +23,9 @@ import databaseConfig from './config/database/database.config';
 
     ReportsModule,
 
-    CloudinaryModule
+    CloudinaryModule,
+
+    PermitsModule
   ],
   controllers: [AppController],
   providers: [
