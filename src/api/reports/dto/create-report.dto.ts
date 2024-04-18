@@ -1,4 +1,21 @@
-import { IsString, Matches, MinLength } from "class-validator";
+import { IsNotEmpty, IsString, MinLength, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
+
+class LocationDto{
+
+  @IsString()
+  @IsNotEmpty()
+  faculty: string;
+
+  @IsString()
+  @IsNotEmpty()
+  building: string;
+
+  @IsString()
+  @IsNotEmpty()
+  classroom: string;
+
+}
 
 export class CreateReportDto {
 
@@ -10,12 +27,9 @@ export class CreateReportDto {
   @MinLength(1)
   description: string;
 
-  @IsString()
-  @Matches(
-    /^[^/\s]+\/[^/\s]+\/[^/\s]+$/, {
-      message: 'location must include faculty/building/classroom'
-    }
-  )
-  location: string
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => LocationDto)
+  location: LocationDto;
 
 }
