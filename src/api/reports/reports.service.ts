@@ -12,6 +12,7 @@ import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
 import { ReportStatus } from './enums/report-status.enum';
 import { Departments } from './enums/departments.enum';
 import { ReportPaginationDto } from './dto/report-pagination.dto';
+import { ValidRoles } from '../users/enums/valid-roles.enum';
 
 @Injectable()
 export class ReportsService {
@@ -155,6 +156,8 @@ export class ReportsService {
 
   async findOne(id: string, user: User) {
     try {
+
+      const validRoles = ['admin', 'mantenimiento', 'obras'];
     
       const report = await this.reportRepository.findOne({
         where: { id: id }
@@ -162,7 +165,11 @@ export class ReportsService {
 
       if( !report ) return new NotFoundException('Report not found').getResponse();
 
-      if( user.roles.includes('admin') ) return report;
+      for(const role of validRoles){
+        if( user.roles.includes(role) ){
+          return report;
+        }
+      }
 
       if( report.user.id !== user.id ) return new ForbiddenException().getResponse();
 

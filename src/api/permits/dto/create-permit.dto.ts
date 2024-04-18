@@ -1,5 +1,4 @@
-import { IsEnum, IsNumber, IsString, IsUUID, Min, MinLength } from "class-validator";
-import { Departments } from "src/api/reports/enums/departments.enum";
+import { IsNumber, IsString, IsUUID, Min, MinLength } from "class-validator";
 import { IsOnlyDate } from "src/common/decorators/is-only-date.decorator";
 
 export class CreatePermitDto {

@@ -29,7 +29,7 @@ export class PermitsController {
   }
 
   @Get(':id')
-  @Auth( ValidRoles.admin )
+  @Auth( ValidRoles.admin, ValidRoles.superUser )
   findOne(
     @Param('id', ParseUUIDPipe) id: string
   ) {
@@ -37,12 +37,23 @@ export class PermitsController {
   }
 
   @Patch(':id')
+  @Auth( ValidRoles.admin, ValidRoles.superUser )
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updatePermitDto: UpdatePermitDto) {
     return this.permitsService.update(id, updatePermitDto);
   }
 
   @Delete(':id')
+  @Auth( ValidRoles.admin, ValidRoles.superUser )
   remove(@Param('id') id: string) {
     return this.permitsService.remove(id);
   }
+
+  @Delete(':id/file')
+  @Auth( ValidRoles.admin, ValidRoles.superUser )
+  DeleteFile(
+    @Param('id', ParseUUIDPipe) id: string
+  ){
+    return this.permitsService.deleteFilePermit(id);
+  }
+
 }

@@ -12,7 +12,6 @@ import { UpdateReportStatusDto } from './dto/update-report-status.dto';
 import { maxFileSize } from 'src/common/constants/constants';
 import { UpdateReportDepartmentDto } from './dto/update-report-department.dto';
 import { PdfService } from 'src/common/pdf/pdf.service';
-import * as fs from 'fs';
 import { Departments } from './enums/departments.enum';
 
 @Controller('reports')
@@ -142,7 +141,7 @@ export class ReportsController {
     res.set({
       'Content-Type': 'application/pdf',
       'Content-disposition': 'attachment; filename=report.pdf',
-      'Content-Lenght': buffer.length
+      'Content-Length': buffer.length
     });
 
     res.send(buffer);
