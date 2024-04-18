@@ -4,7 +4,7 @@ import { User } from "src/api/users/entities/user.entity";
 import { ReportImage } from "./report-image.entity";
 import { Departments } from "../enums/departments.enum";
 import { Permit } from "src/api/permits/entities/permit.entity";
-import { IReportLocation } from '../../../../dist/api/reports/interfaces/report-location.interface';
+import { IReportLocation } from '../interfaces/report-location.interface';
 
 @Entity('reports')
 export class Report {
