@@ -57,9 +57,9 @@ export class UsersService {
     if( !bcrypt.compareSync( password, user.password ) ){
       throw new UnauthorizedException('Credentials are not valid');
     }
-    
+
     return {
-      id: user.id,
+      ...await this.userRepository.findOne({ where: { id: user.id } }),
       token: this.getJwt({ id: user.id })
     }
 
